@@ -17,7 +17,10 @@ public class ProductModel implements Serializable {
     private int price_in_cents;
     private String productDescription;
     private String productImageUrl;
-    private String supplier;
+
+    @ManyToOne
+    @JoinColumn(name = "supplier_supplier_id")
+    private SupplierModel supplier;
     @ManyToOne
     @JoinColumn(name = "product_category_id_category")
     private CategoryModel productCategory;
@@ -62,19 +65,19 @@ public class ProductModel implements Serializable {
         this.productImageUrl = productImageUrl;
     }
 
-    public String getSupplier() {
-        return supplier;
-    }
-
-    public void setSupplier(String supplier) {
-        this.supplier = supplier;
-    }
-
     public CategoryModel getProductCategory() {
         return productCategory;
     }
 
     public void setProductCategory(CategoryModel productCategory) {
         this.productCategory = productCategory;
+    }
+
+    public SupplierModel getSupplier() {
+        return supplier;
+    }
+
+    public void setSupplier(SupplierModel supplier) {
+        this.supplier = supplier;
     }
 }

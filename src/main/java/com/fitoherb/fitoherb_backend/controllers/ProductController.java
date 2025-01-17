@@ -3,8 +3,10 @@ package com.fitoherb.fitoherb_backend.controllers;
 import com.fitoherb.fitoherb_backend.dtos.ProductRecordDto;
 import com.fitoherb.fitoherb_backend.models.CategoryModel;
 import com.fitoherb.fitoherb_backend.models.ProductModel;
+import com.fitoherb.fitoherb_backend.models.SupplierModel;
 import com.fitoherb.fitoherb_backend.repositories.CategoryRepository;
 import com.fitoherb.fitoherb_backend.repositories.ProductRepository;
+import com.fitoherb.fitoherb_backend.repositories.SupplierRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -27,13 +29,20 @@ public class ProductController {
     @Autowired
     CategoryRepository categoryRepository;
 
+    @Autowired
+    private SupplierRepository supplierRepository;
+
     @PostMapping("/products")
     public ResponseEntity<Object> postProduct(@RequestBody @Valid ProductRecordDto productRecordDto) {
-        System.out.println(productRecordDto);
+
         Optional<CategoryModel> category = categoryRepository.findById(UUID.fromString(productRecordDto.productCategory()));
-        System.out.println(category);
         if (category.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category not found");
+        }
+
+        Optional<SupplierModel> supplier = supplierRepository.findById(UUID.fromString(productRecordDto.supplier()));
+        if (supplier.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Supplier not found");
         }
 
         Optional<ProductModel> product = productRepository.findByProductName(productRecordDto.productName());
@@ -47,9 +56,8 @@ public class ProductController {
         productModel.setProductDescription(productRecordDto.productDescription());
         productModel.setProductImageUrl(productRecordDto.productImageUrl());
         productModel.setProductCategory(category.get());
-        productModel.setSupplier(productRecordDto.supplier());
+        productModel.setSupplier(supplier.get());
 
-        // Salvar no banco de dados
         System.out.println(productModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(productRepository.save(productModel));
     }
@@ -60,9 +68,29 @@ public class ProductController {
         return ResponseEntity.ok(productRepository.findAll());
     }
 
-    @GetMapping("/products/{productName}")
+    @GetMapping("/products/name={productName}")
     public ResponseEntity<List<ProductModel>> getProductByName(@PathVariable("productName") String productName) {
         List<ProductModel> productModelList = productRepository.findByProductNameContainingIgnoreCase(productName);
+        if(productModelList.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productModelList);
+    }
+
+    @GetMapping("/products/category={categoryName}")
+    public ResponseEntity<List<ProductModel>> getProductByCategory(@PathVariable("categoryName") String categoryName) {
+        Optional<CategoryModel> category = categoryRepository.findByNameContainingIgnoreCase(categoryName);
+        List<ProductModel> productModelList = productRepository.findByProductCategory(category.get());
+        if(productModelList.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productModelList);
+    }
+
+    @GetMapping("/products/supplier={supplierName}")
+    public ResponseEntity<List<ProductModel>> getProductBySupplier(@PathVariable("supplierName") String supplierName) {
+        Optional<SupplierModel> supplier = supplierRepository.findBySupplierNameContainingIgnoreCase(supplierName);
+        List<ProductModel> productModelList = productRepository.findBySupplier(supplier.get());
         if(productModelList.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
