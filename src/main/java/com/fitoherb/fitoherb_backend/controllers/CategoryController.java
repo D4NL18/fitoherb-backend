@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -65,9 +66,9 @@ public class CategoryController {
         return ResponseEntity.ok(categoryRepository.save(categoryModel));
     }
 
-    @DeleteMapping("/category/{name}")
-        public ResponseEntity<Object> deleteCategory(@PathVariable("name") String name){
-        Optional<CategoryModel> category = categoryRepository.findByName(name);
+    @DeleteMapping("/category/{id}")
+        public ResponseEntity<Object> deleteCategory(@PathVariable("id") UUID id){
+        Optional<CategoryModel> category = categoryRepository.findById(id);
         if(category.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found");
         }

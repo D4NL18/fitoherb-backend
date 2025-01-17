@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 public class UserController {
@@ -49,9 +50,9 @@ public class UserController {
         return ResponseEntity.ok(userRepository.save(userModel));
     }
 
-    @DeleteMapping("/users/{email}")
-    public ResponseEntity<Object> deleteUser(@PathVariable("email") String email) {
-        Optional<UserModel> user = userRepository.findByEmail(email);
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Object> deleteUser(@PathVariable("id") UUID id) {
+        Optional<UserModel> user = userRepository.findById(id);
         if(user.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found");
         }
