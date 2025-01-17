@@ -72,11 +72,8 @@ public class ProductController {
     @PutMapping("/products/{productName}")
     public ResponseEntity<Object> updateProduct(@PathVariable("productName") String productName, @RequestBody @Valid ProductRecordDto productRecordDto) {
         Optional<ProductModel> product = productRepository.findByProductName(productName);
-        Optional<ProductModel> newProductInfo = productRepository.findByProductName(productRecordDto.productName());
         if(product.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found");
-        }else if(!newProductInfo.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Product Already Exists");
         }
         var productModel = product.get();
         BeanUtils.copyProperties(productRecordDto, productModel);
