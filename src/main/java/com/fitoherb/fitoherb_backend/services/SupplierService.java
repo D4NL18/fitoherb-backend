@@ -33,9 +33,16 @@ public class SupplierService {
             return ResponseEntity.badRequest().body("Image file is required.");
         }
 
-        String fileName = image.getOriginalFilename();
-        String filePath = this.uploadDir + File.separator + fileName;
-        String localPath = "images/supplierImages/" + fileName;
+        String fileName = image.getOriginalFilename();// Extensão da imagem (ex: .png, .jpg)
+
+        // Gerar uma chave aleatória (UUID) e anexar ao nome do arquivo
+        String uniqueFileName = UUID.randomUUID().toString() + fileName;
+
+        // Caminho do arquivo completo para salvar a imagem
+        String filePath = this.uploadDir + File.separator + uniqueFileName;
+
+        // Caminho relativo para salvar no banco de dados
+        String localPath = "images/supplierImages/" + uniqueFileName;
 
         try {
 
@@ -91,14 +98,42 @@ public class SupplierService {
     }
 
     public ResponseEntity<Object> updateSupplier(UUID id, SupplierRecordDto supplierRecordDto) {
+
         Optional<SupplierModel> supplier = supplierRepository.findById(id);
-        if(supplier.isEmpty()) {
+        if (supplier.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var supplierModel = new SupplierModel();
-        BeanUtils.copyProperties(supplierRecordDto, supplierModel);
-        return ResponseEntity.ok().body(supplierRepository.save(supplierModel));
+
+        if (supplierRecordDto.image().isEmpty()) {
+            return ResponseEntity.badRequest().body("Image file is required.");
+        }
+
+        // Lógica para salvar a imagem e atualizar os dados do fornecedor
+        String fileName = supplierRecordDto.image().getOriginalFilename();
+        String uniqueFileName = UUID.randomUUID().toString() + fileName;
+        String filePath = this.uploadDir + File.separator + uniqueFileName;
+        String localPath = "images/supplierImages/" + uniqueFileName;
+
+        try {
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            File serverFile = new File(filePath);
+            supplierRecordDto.image().transferTo(serverFile);
+
+            SupplierModel supplierModel = supplier.get();
+            supplierModel.setSupplierName(supplierRecordDto.supplierName());
+            supplierModel.setMaster(supplierRecordDto.isMaster());
+            supplierModel.setImagePath(localPath);
+
+            return ResponseEntity.ok().body(supplierRepository.save(supplierModel));
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error saving file: " + e.getMessage());
+        }
     }
+
 
     public ResponseEntity<Object> deleteSupplier(UUID id) {
         Optional<SupplierModel> supplier = supplierRepository.findById(id);

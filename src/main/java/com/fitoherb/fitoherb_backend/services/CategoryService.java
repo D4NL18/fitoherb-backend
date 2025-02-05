@@ -34,8 +34,8 @@ public class CategoryService {
         return ResponseEntity.ok(categoryRepository.findAll());
     }
 
-    public ResponseEntity<Object> getCategory(String name) {
-        var category = categoryRepository.findByName(name);
+    public ResponseEntity<Object> getCategory(UUID id) {
+        var category = categoryRepository.findById(id);
         if(!category.isPresent()) {
             return ResponseEntity.notFound().build();
         }
@@ -45,8 +45,8 @@ public class CategoryService {
         return ResponseEntity.ok().body(category);
     }
 
-    public ResponseEntity<Object> updateCategory(String name, CategoryRecordDto categoryRecordDto) {
-        Optional<CategoryModel> category = categoryRepository.findByName(name);
+    public ResponseEntity<Object> updateCategory(UUID id, CategoryRecordDto categoryRecordDto) {
+        Optional<CategoryModel> category = categoryRepository.findById(id);
         Optional<CategoryModel> newCategoryInfo = categoryRepository.findByName(categoryRecordDto.name());
 
         if (category.isEmpty()) {

@@ -64,10 +64,8 @@ public class ProductService {
         }
 
         String fileName = image.getOriginalFilename();
-        String fileExtension = fileName.substring(fileName.lastIndexOf('.'));  // Extensão da imagem (ex: .png, .jpg)
-
         // Gerar uma chave aleatória (UUID) e anexar ao nome do arquivo
-        String uniqueFileName = UUID.randomUUID().toString() + fileName + fileExtension;
+        String uniqueFileName = UUID.randomUUID().toString() + fileName;
 
         // Caminho do arquivo completo para salvar a imagem
         String filePath = this.uploadDir + File.separator + uniqueFileName;

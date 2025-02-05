@@ -45,7 +45,11 @@ public class SupplierController {
     }
 
     @PutMapping("/supplier/{id}")
-    public ResponseEntity<Object> updateSupplier(@PathVariable UUID id, @RequestBody @Valid SupplierRecordDto supplierRecordDto) {
+    public ResponseEntity<Object> updateSupplier(@PathVariable UUID id,
+                                                 @RequestParam("supplierName") String supplierName,
+                                                 @RequestParam("image") MultipartFile image,
+                                                 @RequestParam("isMaster") boolean isMaster) {
+        SupplierRecordDto supplierRecordDto = new SupplierRecordDto(supplierName, image, isMaster);
         return supplierService.updateSupplier(id, supplierRecordDto);
     }
 

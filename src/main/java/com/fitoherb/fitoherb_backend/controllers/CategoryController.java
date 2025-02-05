@@ -29,14 +29,15 @@ public class CategoryController {
         return categoryService.getAllCategories();
     }
 
-    @GetMapping("/category/{name}")
-    public ResponseEntity<Object> getCategory(@PathVariable String name) {
-        return categoryService.getCategory(name);
+
+    @GetMapping("/category/{id}")
+    public ResponseEntity<Object> getCategory(@PathVariable UUID id) {
+        return categoryService.getCategory(id);
     }
 
-    @PutMapping("/category/{name}")
-    public ResponseEntity<Object> updateCategory(@PathVariable String name, @RequestBody @Valid CategoryRecordDto categoryRecordDto) {
-        return categoryService.updateCategory(name, categoryRecordDto);
+    @PutMapping("/category/{id}")
+    public ResponseEntity<Object> updateCategory(@PathVariable UUID id, @RequestBody @Valid CategoryRecordDto categoryRecordDto) {
+        return categoryService.updateCategory(id, categoryRecordDto);
     }
 
     @DeleteMapping("/category/{id}")
