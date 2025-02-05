@@ -1,5 +1,6 @@
 package com.fitoherb.fitoherb_backend.services;
 
+import com.fitoherb.fitoherb_backend.dtos.ProductEditDto;
 import com.fitoherb.fitoherb_backend.dtos.ProductRecordDto;
 import com.fitoherb.fitoherb_backend.models.CategoryModel;
 import com.fitoherb.fitoherb_backend.models.ProductModel;
@@ -112,6 +113,17 @@ public class ProductService {
         return ResponseEntity.ok(productModelList);
     }
 
+    public ResponseEntity<Optional<ProductModel>> getProductById(UUID id) {
+        Optional<ProductModel> productModel = productRepository.findById(id);
+        if(productModel.isPresent()) {
+            return ResponseEntity.ok(productModel);
+        }
+        else {
+            return ResponseEntity.notFound().build();
+        }
+        
+    }
+
     public ResponseEntity<List<ProductModel>> getProductByCategory(String categoryName) {
         Optional<CategoryModel> category = categoryRepository.findByNameContainingIgnoreCase(categoryName);
         List<ProductModel> productModelList = productRepository.findByProductCategory(category.get());
@@ -130,13 +142,55 @@ public class ProductService {
         return ResponseEntity.ok(productModelList);
     }
 
-    public ResponseEntity<Object> updateProduct(String productName, ProductRecordDto productRecordDto) {
-        Optional<ProductModel> product = productRepository.findByProductName(productName);
-        if(product.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found");
+    public ResponseEntity<Object> updateProduct(UUID id, ProductEditDto productRecordDto) {
+        Optional<ProductModel> productOpt = productRepository.findById(id);
+        if (productOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
         }
-        var productModel = product.get();
-        BeanUtils.copyProperties(productRecordDto, productModel);
+
+        Optional<SupplierModel> supplierOpt = supplierRepository.findById(UUID.fromString(productRecordDto.supplier()));
+        Optional<CategoryModel> categoryOpt = categoryRepository.findById(UUID.fromString(productRecordDto.productCategory()));
+
+        if (supplierOpt.isEmpty() || categoryOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Supplier or category not found");
+        }
+
+        ProductModel productModel = productOpt.get();
+        SupplierModel supplier = supplierOpt.get();
+        CategoryModel category = categoryOpt.get();
+
+        // Atualizar os dados do produto
+        productModel.setProductName(productRecordDto.productName());
+        productModel.setProductCategory(category);
+        productModel.setProductDescription(productRecordDto.productDescription());
+        productModel.setSupplier(supplier);
+        productModel.setPrice_in_cents(productRecordDto.price_in_cents());
+
+        // Lógica para atualizar a imagem se for enviada
+        if (productRecordDto.productImageUrl().isPresent()) {
+            MultipartFile image = productRecordDto.productImageUrl().get();
+            if (!image.isEmpty()) {
+                String fileName = image.getOriginalFilename();
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
+                String filePath = this.uploadDir + File.separator + uniqueFileName;
+                String localPath = "images/productImages/" + uniqueFileName;
+
+                try {
+                    File dir = new File(uploadDir);
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+
+                    File serverFile = new File(filePath);
+                    image.transferTo(serverFile);
+
+                    productModel.setProductImageUrl(localPath);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving file: " + e.getMessage());
+                }
+            }
+        }
+
         return ResponseEntity.ok(productRepository.save(productModel));
     }
 
