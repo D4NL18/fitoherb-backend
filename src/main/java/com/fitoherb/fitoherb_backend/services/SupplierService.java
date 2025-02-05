@@ -1,5 +1,6 @@
 package com.fitoherb.fitoherb_backend.services;
 
+import com.fitoherb.fitoherb_backend.dtos.SupplierEditDto;
 import com.fitoherb.fitoherb_backend.dtos.SupplierRecordDto;
 import com.fitoherb.fitoherb_backend.models.SupplierModel;
 import com.fitoherb.fitoherb_backend.repositories.SupplierRepository;
@@ -97,40 +98,46 @@ public class SupplierService {
         return ResponseEntity.ok().body(supplier);
     }
 
-    public ResponseEntity<Object> updateSupplier(UUID id, SupplierRecordDto supplierRecordDto) {
+    public ResponseEntity<Object> updateSupplier(UUID id, SupplierEditDto supplierRecordDto) {
 
         Optional<SupplierModel> supplier = supplierRepository.findById(id);
         if (supplier.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        if (supplierRecordDto.image().isEmpty()) {
-            return ResponseEntity.badRequest().body("Image file is required.");
-        }
+        if (supplierRecordDto.image().isPresent()) {
+            // Lógica para salvar a imagem e atualizar os dados do fornecedor
+            MultipartFile image = supplierRecordDto.image().get();
+            String fileName = image.getOriginalFilename();
+            String uniqueFileName = UUID.randomUUID().toString() + fileName;
+            String filePath = this.uploadDir + File.separator + uniqueFileName;
+            String localPath = "images/supplierImages/" + uniqueFileName;
 
-        // Lógica para salvar a imagem e atualizar os dados do fornecedor
-        String fileName = supplierRecordDto.image().getOriginalFilename();
-        String uniqueFileName = UUID.randomUUID().toString() + fileName;
-        String filePath = this.uploadDir + File.separator + uniqueFileName;
-        String localPath = "images/supplierImages/" + uniqueFileName;
+            try {
+                File dir = new File(uploadDir);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
 
-        try {
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
+                File serverFile = new File(filePath);
+                image.transferTo(serverFile);
+
+                SupplierModel supplierModel = supplier.get();
+                supplierModel.setSupplierName(supplierRecordDto.supplierName());
+                supplierModel.setMaster(supplierRecordDto.isMaster());
+                supplierModel.setImagePath(localPath);
+
+                return ResponseEntity.ok().body(supplierRepository.save(supplierModel));
+            } catch (IOException e) {
+                return ResponseEntity.status(500).body("Error saving file: " + e.getMessage());
             }
-
-            File serverFile = new File(filePath);
-            supplierRecordDto.image().transferTo(serverFile);
-
+        }
+        else {
             SupplierModel supplierModel = supplier.get();
             supplierModel.setSupplierName(supplierRecordDto.supplierName());
             supplierModel.setMaster(supplierRecordDto.isMaster());
-            supplierModel.setImagePath(localPath);
 
             return ResponseEntity.ok().body(supplierRepository.save(supplierModel));
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error saving file: " + e.getMessage());
         }
     }
 
