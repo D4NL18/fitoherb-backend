@@ -1,11 +1,17 @@
 package com.fitoherb.fitoherb_backend.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
+
+@Getter
+@Setter
+
 @Table(name = "TB_PRODUCTS")
 public class ProductModel implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -19,10 +25,10 @@ public class ProductModel implements Serializable {
     private String productImageUrl;
 
     @ManyToOne
-    @JoinColumn(name = "supplier_supplier_id")
+    @JoinColumn(name = "supplier_id")
     private SupplierModel supplier;
     @ManyToOne
-    @JoinColumn(name = "product_category_id_category")
+    @JoinColumn(name = "id_category")
     private CategoryModel productCategory;
 
     public UUID getIdProduct() {
