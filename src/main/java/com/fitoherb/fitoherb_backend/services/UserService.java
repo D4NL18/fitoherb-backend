@@ -46,7 +46,7 @@ public class UserService {
         var userModel = user.get();
 
         if(userRecordDto.password().isBlank()) {
-            UserRecordDto userRecordDto1 = new UserRecordDto(userRecordDto.user_name(), userRecordDto.email(), userModel.getPassword());
+            UserRecordDto userRecordDto1 = new UserRecordDto(userRecordDto.user_name(), userRecordDto.email(), userModel.getPassword(), userModel.isAdmin());
             BeanUtils.copyProperties(userRecordDto1, userModel);
         }else {
             BeanUtils.copyProperties(userRecordDto, userModel);

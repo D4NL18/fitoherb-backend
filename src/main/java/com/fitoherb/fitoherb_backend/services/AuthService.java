@@ -42,6 +42,7 @@ public class AuthService {
             newUser.setPassword(passwordEncoder.encode(body.password()));
             newUser.setEmail(body.email());
             newUser.setUser_name(body.user_name());
+            newUser.setAdmin(body.isAdmin());
             this.userRepository.save(newUser);
 
             String token = tokenService.generateToken(newUser);

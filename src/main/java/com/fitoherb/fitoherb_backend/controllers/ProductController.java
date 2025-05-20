@@ -28,9 +28,9 @@ public class ProductController {
                                              @RequestParam("productImageUrl") MultipartFile productImageUrl,
                                              @RequestParam("price_in_cents") int price_in_cents,
                                              @RequestParam("productDescription") String productDescription,
-                                             @RequestParam("productCategory") CategoryModel productCategory,
-                                             @RequestParam("supplier") SupplierModel supplier) {
-        ProductRecordDto productRecordDto = new ProductRecordDto(productName, price_in_cents, productDescription, productCategory.getIdCategory().toString(),productImageUrl, supplier.getSupplierId().toString());
+                                             @RequestParam("productCategory") UUID productCategory,
+                                             @RequestParam("supplier") UUID supplier) {
+        ProductRecordDto productRecordDto = new ProductRecordDto(productName, price_in_cents, productDescription, productCategory.toString(), productImageUrl, supplier.toString());
 
         return productService.postProduct(productRecordDto);
     }
@@ -68,15 +68,15 @@ public class ProductController {
                                                 @RequestParam("productImageUrl") Optional<MultipartFile> productImageUrl,
                                                 @RequestParam("price_in_cents") int price_in_cents,
                                                 @RequestParam("productDescription") String productDescription,
-                                                @RequestParam("productCategory") CategoryModel productCategory,
-                                                @RequestParam("supplier") SupplierModel supplier) {
+                                                @RequestParam("productCategory") UUID productCategory,
+                                                @RequestParam("supplier") UUID supplier) {
         ProductEditDto productRecordDto = new ProductEditDto(
                 productName,
                 price_in_cents,
                 productDescription,
-                productCategory.getIdCategory().toString(),
+                productCategory.toString(),
                 productImageUrl,
-                supplier.getSupplierId().toString()
+                supplier.toString()
         );
         return productService.updateProduct(id, productRecordDto);
     }

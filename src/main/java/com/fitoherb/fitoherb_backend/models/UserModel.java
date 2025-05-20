@@ -11,9 +11,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-
 @Table(name = "DB_USERS")
 public class UserModel {
 
@@ -23,4 +20,5 @@ public class UserModel {
     private String user_name;
     private String password;
     private String email;
+    private boolean isAdmin;
 }

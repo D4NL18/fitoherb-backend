@@ -4,7 +4,6 @@ import com.fitoherb.fitoherb_backend.dtos.UserEditDto;
 import com.fitoherb.fitoherb_backend.dtos.UserRecordDto;
 import com.fitoherb.fitoherb_backend.models.UserModel;
 import com.fitoherb.fitoherb_backend.services.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +31,11 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@PathVariable("id") UUID id,
                                              @RequestParam("user_name") String user_name,
                                              @RequestParam("email") String email,
-                                             @RequestParam("password") String password) {
+                                             @RequestParam("password") String password,
+                                             @RequestParam("isAdmin") boolean isAdmin
+    ) {
 
-        UserEditDto userEditDTO = new UserEditDto(user_name, email, password);
+        UserEditDto userEditDTO = new UserEditDto(user_name, email, password, isAdmin);
         return userService.updateUser(id, userEditDTO);
     }
 
